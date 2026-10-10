@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import { Icon } from "./ui-icon";
-import type { AiToolKey } from "../lib/types";
 import { useToast } from "./ui-provider";
 
 const config = {
@@ -61,30 +60,33 @@ const config = {
 
 export function AiToolForm({ tool }: { tool: keyof typeof config }) {
   const toolConfig = config[tool];
-  const [first, setFirst] = useState("");
-  const [second, setSecond] = useState("");
+  const [first, setFirst] = useState(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const roleParam = params.get("role");
+      if (tool === "interview" && roleParam) {
+        return decodeURIComponent(roleParam);
+      }
+    }
+    return "";
+  });
+
+  const [second, setSecond] = useState(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const jobParam = params.get("job");
+      if ((tool === "matcher" || tool === "cover-letter") && jobParam) {
+        return decodeURIComponent(jobParam);
+      }
+    }
+    return "";
+  });
+
   const [result, setResult] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const resultRef = useRef<HTMLDivElement>(null);
   const { success, error: toastError, info } = useToast();
-
-  useEffect(() => {
-    // Check if query parameters exist in URL (e.g. redirected from job vacancy)
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const jobParam = params.get("job");
-      const roleParam = params.get("role");
-
-      if (tool === "matcher" && jobParam) {
-        setSecond(decodeURIComponent(jobParam));
-      } else if (tool === "interview" && roleParam) {
-        setFirst(decodeURIComponent(roleParam));
-      } else if (tool === "cover-letter" && jobParam) {
-        setSecond(decodeURIComponent(jobParam));
-      }
-    }
-  }, [tool]);
 
   function loadSample() {
     setFirst(toolConfig.sample.first);

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getAdminSession, verifyAdminAccess } from "../../../lib/admin-auth";
+import { verifyAdminAccess } from "../../../lib/admin-auth";
 import { createClient } from "../../../lib/supabase/server";
 import { memoryOverrides } from "../../../lib/supabase/admin";
 
@@ -11,7 +11,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const { currentPassword, newPassword, confirmPassword } = body;
+    const { newPassword, confirmPassword } = body;
 
     if (!newPassword || newPassword.length < 8) {
       return NextResponse.json(
@@ -27,7 +27,6 @@ export async function POST(request: Request) {
       );
     }
 
-    const session = await getAdminSession();
     let supabaseUpdated = false;
 
     // If signed in via Supabase user account, update through Supabase Auth

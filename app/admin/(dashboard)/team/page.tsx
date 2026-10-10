@@ -60,7 +60,6 @@ export default function AdminTeamPage() {
   }
 
   async function loadMembers() {
-    setLoading(true);
     try {
       const res = await fetch("/api/admin/members");
       const data = await res.json();
@@ -73,7 +72,8 @@ export default function AdminTeamPage() {
   }
 
   useEffect(() => {
-    loadMembers();
+    void loadMembers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filteredMembers = useMemo(() => {

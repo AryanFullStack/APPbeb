@@ -1,8 +1,28 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Icon } from "./components/ui-icon";
 import { JobCard } from "./components/job-card";
 import { SectionHeading } from "./components/section-heading";
 import { fetchJobs, fetchCategories, fetchCareerGuides } from "./lib/data";
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://appbeb.com";
+
+export const metadata: Metadata = {
+  title: "AppBeb — Verified UK & European Job Opportunities & Free AI Career Tools",
+  description:
+    "Discover verified UK and European vacancies from authorized employers. Build professional ATS-ready CVs and prepare for job interviews with free, private AI career tools.",
+  alternates: {
+    canonical: siteUrl,
+  },
+  openGraph: {
+    title: "AppBeb — Verified UK & European Jobs & AI Career Tools",
+    description:
+      "Find verified employment opportunities across logistics, transport, healthcare, cleaning, and tech. Zero account required.",
+    url: siteUrl,
+    type: "website",
+    siteName: "AppBeb",
+  },
+};
 
 const tools = [
   {
@@ -114,7 +134,7 @@ export default async function Home() {
             {categories.slice(0, 8).map((category) => (
               <Link
                 key={category.name}
-                href={`/jobs?category=${encodeURIComponent(category.name)}`}
+                href={`/jobs/category/${category.slug}`}
                 className="category-card"
               >
                 <span className="category-icon">

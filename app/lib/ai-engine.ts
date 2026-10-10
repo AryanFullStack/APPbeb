@@ -352,10 +352,14 @@ Option 3 (Concise & Direct):
 Results-oriented ${role} with a solid track record in ${skillStr}. Eager to leverage hands-on problem-solving and strong organizational skills to deliver immediate value to a collaborative team.`;
 }
 
-function generateResumeBullets(rawRole: string, context: string): string {
-  return `• Spearheaded daily ${rawRole || "operational workflows"}, ensuring 100% adherence to quality and safety standards.
+function generateResumeBullets(rawRole: string, experienceContext = ""): string {
+  const role = rawRole.trim() || "operational workflows";
+  const contextSkills = extractKeywords(experienceContext);
+  const extraSkill = contextSkills.length > 0 ? ` and leveraging ${contextSkills[0]}` : "";
+
+  return `• Spearheaded daily ${role}${extraSkill}, ensuring 100% adherence to quality, timeline, and safety standards.
 • Streamlined recurring procedures, reducing turnaround times and saving approximately 4-6 hours per week.
-• Collaborated closely with cross-functional team members to identify and promptly resolve bottlenecks.
+• Collaborated closely with cross-functional team members to identify and promptly resolve operational bottlenecks.
 • Recognized for exceptional dependability, maintaining a 99%+ accuracy rating across all deliverables.
 • Mentored and supported new team members on standard operating procedures and software tools.`;
 }

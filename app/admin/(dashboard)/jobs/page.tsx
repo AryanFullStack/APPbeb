@@ -13,6 +13,7 @@ interface JobCategory {
 interface AdminJob {
   id: string;
   external_id?: string;
+  source?: string;
   title: string;
   company: string;
   location: string;
@@ -25,6 +26,25 @@ interface AdminJob {
   application_url: string;
   published_at: string;
   is_active: boolean;
+  verified_at?: string;
+  listing_type?: string;
+}
+
+function getJobTypeBadge(job: AdminJob) {
+  const isLead =
+    job.listing_type === "career_portal_resource" ||
+    (job.source && job.source.toLowerCase().includes("lead")) ||
+    (job.external_id && (job.external_id.startsWith("intl-") || job.external_id.startsWith("eu-"))) ||
+    job.title.toLowerCase().includes("opportunities") ||
+    (job.application_url && (job.application_url.endsWith("/careers") || job.application_url.endsWith("/jobs")));
+
+  if (job.listing_type === "verified_vacancy" || (job.verified_at && !isLead)) {
+    return { label: "Verified Vacancy", bg: "var(--teal-soft)", color: "var(--teal-dark)" };
+  }
+  if (isLead) {
+    return { label: "Career Portal", bg: "var(--bg-subtle)", color: "var(--navy-muted)" };
+  }
+  return { label: "Awaiting Review", bg: "#fef3c7", color: "#92400e" };
 }
 
 export default function AdminJobsPage() {
@@ -60,7 +80,6 @@ export default function AdminJobsPage() {
 
   // Load jobs and categories
   async function loadData() {
-    setLoading(true);
     try {
       const [jobsRes, catsRes] = await Promise.all([
         fetch("/api/admin/jobs"),
@@ -79,7 +98,8 @@ export default function AdminJobsPage() {
   }
 
   useEffect(() => {
-    loadData();
+    void loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const filteredJobs = useMemo(() => {
@@ -90,10 +110,19 @@ export default function AdminJobsPage() {
         selectedCategory === "all" ||
         job.category_id === selectedCategory ||
         job.categories?.slug === selectedCategory;
+      const isLead =
+        job.listing_type === "career_portal_resource" ||
+        Boolean(job.source && job.source.toLowerCase().includes("lead")) ||
+        Boolean(job.external_id && (job.external_id.startsWith("intl-") || job.external_id.startsWith("eu-"))) ||
+        job.title.toLowerCase().includes("opportunities");
+      const isVerified = job.listing_type === "verified_vacancy" || (Boolean(job.verified_at) && !isLead);
+
       const matchesStatus =
         selectedStatus === "all" ||
         (selectedStatus === "active" && job.is_active) ||
-        (selectedStatus === "inactive" && !job.is_active);
+        (selectedStatus === "inactive" && !job.is_active) ||
+        (selectedStatus === "verified" && isVerified) ||
+        (selectedStatus === "portal" && isLead);
 
       return matchesSearch && matchesCat && matchesStatus;
     });
@@ -281,11 +310,13 @@ export default function AdminJobsPage() {
 
         <select
           className="input-control"
-          style={{ width: "auto", minWidth: 140 }}
+          style={{ width: "auto", minWidth: 160 }}
           value={selectedStatus}
           onChange={(e) => setSelectedStatus(e.target.value)}
         >
-          <option value="all">All Statuses</option>
+          <option value="all">All Listings</option>
+          <option value="verified">Verified Vacancies</option>
+          <option value="portal">Career Portal Directory</option>
           <option value="active">Active Only</option>
           <option value="inactive">Inactive Only</option>
         </select>
@@ -338,27 +369,46 @@ export default function AdminJobsPage() {
                     </span>
                   </td>
                   <td style={{ padding: "12px 16px" }}>
-                    <button
-                      type="button"
-                      onClick={() => handleToggleStatus(job)}
-                      title="Click to toggle status"
-                      style={{
-                        padding: "4px 10px",
-                        borderRadius: 100,
-                        border: "none",
-                        fontSize: 11,
-                        fontWeight: 700,
-                        cursor: "pointer",
-                        background: job.is_active ? "var(--teal-soft)" : "var(--line)",
-                        color: job.is_active ? "var(--teal-dark)" : "var(--muted)",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: 5,
-                      }}
-                    >
-                      <span style={{ width: 6, height: 6, borderRadius: "50%", background: job.is_active ? "var(--teal)" : "var(--muted)" }} />
-                      {job.is_active ? "Active" : "Inactive"}
-                    </button>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 6, alignItems: "flex-start" }}>
+                      <button
+                        type="button"
+                        onClick={() => handleToggleStatus(job)}
+                        title="Click to toggle active status"
+                        style={{
+                          padding: "3px 8px",
+                          borderRadius: 100,
+                          border: "none",
+                          fontSize: 11,
+                          fontWeight: 700,
+                          cursor: "pointer",
+                          background: job.is_active ? "var(--teal-soft)" : "var(--line)",
+                          color: job.is_active ? "var(--teal-dark)" : "var(--muted)",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: 5,
+                        }}
+                      >
+                        <span style={{ width: 6, height: 6, borderRadius: "50%", background: job.is_active ? "var(--teal)" : "var(--muted)" }} />
+                        {job.is_active ? "Active" : "Inactive"}
+                      </button>
+                      {(() => {
+                        const badge = getJobTypeBadge(job);
+                        return (
+                          <span
+                            style={{
+                              fontSize: 10.5,
+                              fontWeight: 600,
+                              background: badge.bg,
+                              color: badge.color,
+                              padding: "2px 7px",
+                              borderRadius: 4,
+                            }}
+                          >
+                            {badge.label}
+                          </span>
+                        );
+                      })()}
+                    </div>
                   </td>
                   <td style={{ padding: "12px 16px", color: "var(--navy-muted)", fontSize: 12 }}>
                     {job.published_at ? new Date(job.published_at).toLocaleDateString() : "Recent"}

@@ -1,5 +1,22 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Icon } from "../components/ui-icon";
+
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://appbeb.com";
+
+export const metadata: Metadata = {
+  title: "Free AI Career Tools — CV Builder & Interview Prep",
+  description:
+    "Free, private in-browser AI career tools. Build ATS-ready CVs, match your experience against job descriptions, draft tailored cover letters, and practice interview questions.",
+  alternates: {
+    canonical: `${siteUrl}/ai-tools`,
+  },
+  openGraph: {
+    title: "Free AI Career Tools — AppBeb",
+    description: "Private in-browser CV builder, resume matcher, and interview prep.",
+    url: `${siteUrl}/ai-tools`,
+  },
+};
 
 const tools = [
   {
@@ -37,6 +54,11 @@ export default function AiToolsPage() {
     <>
       <section className="tools-intro">
         <div className="shell">
+          <div className="breadcrumb">
+            <Link href="/">Home</Link>
+            <Icon name="chevron-right" size={13} />
+            <span>AI Career Tools</span>
+          </div>
           <div className="eyebrow">
             <Icon name="sparkles" size={13} /> Practical AI Career Assistants
           </div>

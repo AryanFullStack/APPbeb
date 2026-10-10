@@ -1,9 +1,21 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Icon } from "../components/ui-icon";
 
-export const metadata = {
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://appbeb.com";
+
+export const metadata: Metadata = {
   title: "Pricing & Transparency",
-  description: "AppBeb keeps essential job search and career tools accessible and honest.",
+  description:
+    "AppBeb keeps essential job search and private in-browser CV tools 100% free with zero fees for job applicants.",
+  alternates: {
+    canonical: `${siteUrl}/pricing`,
+  },
+  openGraph: {
+    title: "Pricing & Transparency — AppBeb",
+    description: "Always free for job applicants.",
+    url: `${siteUrl}/pricing`,
+  },
 };
 
 export default function PricingPage() {
@@ -59,10 +71,6 @@ export default function PricingPage() {
               <div className="status-row">
                 <span>AI Career Assistants (Resume matcher, cover letters, prep)</span>
                 <span className="status-badge-ready">Included Free Tier</span>
-              </div>
-              <div className="status-row">
-                <span>Third-party tracker advertising</span>
-                <span style={{ color: "var(--muted)", fontWeight: 600 }}>Disabled</span>
               </div>
             </div>
 

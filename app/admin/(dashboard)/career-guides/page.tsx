@@ -50,6 +50,7 @@ export default function AdminCareerGuidesPage() {
 
   useEffect(() => {
     loadGuides();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function handleOpenCreate() {

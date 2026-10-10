@@ -41,6 +41,7 @@ export default function AdminCategoriesPage() {
 
   useEffect(() => {
     loadCategories();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function handleOpenCreate() {

@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { fetchCareerGuideBySlug } from "../../lib/data";
 import { Icon } from "../../components/ui-icon";
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://appbeb.com";
+
 export async function generateMetadata({
   params,
 }: {
@@ -11,12 +13,34 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const guide = await fetchCareerGuideBySlug(slug);
-  return guide
-    ? {
-        title: `${guide.title} | AppBeb Career Guides`,
-        description: guide.excerpt,
-      }
-    : { title: "Guide Not Found" };
+
+  if (!guide) {
+    return {
+      title: "Guide Not Found",
+      robots: { index: false, follow: false },
+    };
+  }
+
+  const canonicalUrl = `${siteUrl}/career-guides/${guide.slug}`;
+
+  return {
+    title: `${guide.title} | AppBeb Career Guides`,
+    description: guide.excerpt,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title: `${guide.title} — AppBeb`,
+      description: guide.excerpt,
+      url: canonicalUrl,
+      type: "article",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: guide.title,
+      description: guide.excerpt,
+    },
+  };
 }
 
 export default async function GuidePage({
@@ -28,12 +52,26 @@ export default async function GuidePage({
   const guide = await fetchCareerGuideBySlug(slug);
   if (!guide) notFound();
 
-  const jsonLd = {
+  const canonicalUrl = `${siteUrl}/career-guides/${guide.slug}`;
+
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Home", item: siteUrl },
+      { "@type": "ListItem", position: 2, name: "Career Guides", item: `${siteUrl}/career-guides` },
+      { "@type": "ListItem", position: 3, name: guide.title, item: canonicalUrl },
+    ],
+  };
+
+  const articleJsonLd = {
     "@context": "https://schema.org",
     "@type": "Article",
     headline: guide.title,
     description: guide.excerpt,
-    author: { "@type": "Organization", name: "AppBeb" },
+    mainEntityOfPage: canonicalUrl,
+    author: { "@type": "Organization", name: "AppBeb", url: siteUrl },
+    publisher: { "@type": "Organization", name: "AppBeb", url: siteUrl },
     datePublished: guide.publishedAt,
   };
 
@@ -48,7 +86,11 @@ export default async function GuidePage({
       <div className="shell" style={{ maxWidth: 840 }}>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
         />
 
         <div className="breadcrumb">

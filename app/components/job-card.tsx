@@ -66,11 +66,29 @@ export function JobCard({ job }: { job: Job }) {
           <div className="job-card-meta">
             <div className="job-company">
               <span>{job.company}</span>
-              {job.isVerified && (
+              {job.isVerified ? (
                 <span className="verified">
-                  <Icon name="check" size={11} /> Verified
+                  <Icon name="check" size={11} /> Verified Vacancy
                 </span>
-              )}
+              ) : job.listingType === "career_portal_resource" ? (
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 600,
+                    color: "var(--navy-muted)",
+                    background: "var(--bg-subtle)",
+                    border: "1px solid var(--line)",
+                    padding: "2px 8px",
+                    borderRadius: 999,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 4,
+                  }}
+                  title="Direct link to employer recruitment portal"
+                >
+                  <Icon name="briefcase" size={11} /> Career Portal
+                </span>
+              ) : null}
             </div>
             <Link href={`/jobs/${job.slug}`} className="job-title">
               {job.title}

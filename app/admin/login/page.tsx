@@ -8,26 +8,29 @@ import { Icon } from "../../components/ui-icon";
 export default function AdminLoginPage() {
   const router = useRouter();
   const [authMode, setAuthMode] = useState<"credentials" | "key">("credentials");
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(() => {
+    if (typeof window !== "undefined") {
+      return new URLSearchParams(window.location.search).get("email") || "";
+    }
+    return "";
+  });
   const [password, setPassword] = useState("");
   const [adminKey, setAdminKey] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [checkingAuth, setCheckingAuth] = useState(true);
-  const [inviteNotice, setInviteNotice] = useState<string | null>(null);
-
-  // Check if already authenticated and extract invite params
-  useEffect(() => {
+  const [inviteNotice] = useState<string | null>(() => {
     if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const emailParam = params.get("email");
-      const inviteParam = params.get("invite");
-      if (emailParam) setEmail(emailParam);
-      if (inviteParam) {
-        setInviteNotice("Welcome! Enter your temporary credentials to activate your admin account.");
+      const invite = new URLSearchParams(window.location.search).get("invite");
+      if (invite) {
+        return "Welcome! Enter your temporary credentials to activate your admin account.";
       }
     }
+    return null;
+  });
 
+  // Check if already authenticated
+  useEffect(() => {
     fetch("/api/admin/auth")
       .then((res) => {
         if (res.ok) {

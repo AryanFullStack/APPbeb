@@ -34,7 +34,7 @@ export async function GET(request: Request) {
       categories,
       total: filtered.length,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Failed to fetch jobs", jobs: [], categories: [], total: 0 },
       { status: 500 }

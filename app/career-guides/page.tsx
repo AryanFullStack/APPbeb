@@ -1,10 +1,22 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { Icon } from "../components/ui-icon";
 import { fetchCareerGuides } from "../lib/data";
 
-export const metadata = {
-  title: "Career Guides | AppBeb",
-  description: "Practical UK advice for CVs, job applications, interview prep, and spotting employment scams.",
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://appbeb.com";
+
+export const metadata: Metadata = {
+  title: "UK & European Career Guides",
+  description:
+    "Practical career advice for UK CV writing, warehouse operative applications, commercial driver licensing, cleaning roles, interview prep, and avoiding recruitment scams.",
+  alternates: {
+    canonical: `${siteUrl}/career-guides`,
+  },
+  openGraph: {
+    title: "Career Guides — AppBeb",
+    description: "Clear, practical employment guides for job seekers in the UK and Europe.",
+    url: `${siteUrl}/career-guides`,
+  },
 };
 
 export default async function CareerGuidesPage() {

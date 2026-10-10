@@ -8,6 +8,13 @@ export type EmploymentType =
 
 export type WorkMode = "On-site" | "Hybrid" | "Remote" | string;
 
+export type ListingType =
+  | "verified_vacancy"
+  | "career_portal_resource"
+  | "awaiting_verification"
+  | "expired_or_closed"
+  | "rejected_or_invalid";
+
 export type Job = {
   id: string;
   slug: string;
@@ -18,11 +25,13 @@ export type Job = {
   employmentType: EmploymentType;
   workMode: WorkMode;
   publishedAt: string;
+  expiresAt?: string;
   source: string;
   applicationUrl: string;
   description: string;
   skills: string[];
   isVerified: boolean;
+  listingType: ListingType;
   isPreview: boolean;
   imageUrl?: string;
   salary?: string;

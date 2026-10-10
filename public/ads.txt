@@ -1,0 +1,12 @@
+# ==============================================================================
+# AppBeb.com Authorized Digital Sellers (ads.txt)
+# Official specification: https://iabtechlab.com/ads-txt/
+# Google AdSense guidelines: https://support.google.com/adsense/answer/7532444
+# ==============================================================================
+# IMPORTANT: Replace "pub-0000000000000000" below with your actual Google AdSense
+# Publisher ID from your AdSense Dashboard (Account > Settings > Account information).
+#
+# Format:
+# <Field #1: Domain of the Advertising System>, <Field #2: Exchange Publisher ID>, <Field #3: Relationship (DIRECT/RESELLER)>, <Field #4: Certification Authority ID>
+#
+google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0

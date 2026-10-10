@@ -34,9 +34,72 @@ function getCategoryIcon(
   return "briefcase";
 }
 
+// Job classification helper to separate genuine vacancies from external career portals
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function classifyJobRow(row: any): { listingType: import("./types").ListingType; isVerified: boolean } {
+  const isExpired = (row.expires_at && new Date(row.expires_at) < new Date()) || row.is_active === false;
+  if (isExpired) {
+    return { listingType: "expired_or_closed", isVerified: false };
+  }
+
+  if (
+    row.listing_type &&
+    ["verified_vacancy", "career_portal_resource", "awaiting_verification", "expired_or_closed", "rejected_or_invalid"].includes(
+      row.listing_type
+    )
+  ) {
+    return {
+      listingType: row.listing_type,
+      isVerified: row.listing_type === "verified_vacancy" && Boolean(row.verified_at),
+    };
+  }
+
+  // Detect general external career portal directory leads (e.g. EURES EU portal, general career hubs)
+  const isLead =
+    (row.source && row.source.toLowerCase().includes("lead")) ||
+    (row.external_id && (row.external_id.startsWith("intl-") || row.external_id.startsWith("eu-"))) ||
+    (row.title && row.title.toLowerCase().includes("opportunities")) ||
+    (row.application_url &&
+      (row.application_url.endsWith("/careers") ||
+        row.application_url.endsWith("/careers/") ||
+        row.application_url.endsWith("/jobs") ||
+        row.application_url.endsWith("/jobs/") ||
+        row.application_url.includes("europa.eu") ||
+        row.application_url.includes("/join-our-team")));
+
+  if (isLead) {
+    return { listingType: "career_portal_resource", isVerified: false };
+  }
+
+  if (row.verified_at) {
+    return { listingType: "verified_vacancy", isVerified: true };
+  }
+
+  return { listingType: "awaiting_verification", isVerified: false };
+}
+
+// Extract salary from structured field or natural text description
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function extractSalary(row: any): string | undefined {
+  if (row.salary && typeof row.salary === "string") return row.salary;
+  if (!row.description) return undefined;
+  const match = row.description.match(
+    /(?:salary of |annual salary of |offering an annual salary of |stated annual salary of )([£$€][0-9,]+(?:\s*\/\s*(?:year|annum|hr|hour))?)/i
+  );
+  if (match) {
+    let s = match[1].trim();
+    if (!s.includes("/")) s += " / year";
+    return s;
+  }
+  const simpleMatch = row.description.match(/([£$€][0-9,]+(?:\s*\/\s*(?:year|annum|hr|hour)))/i);
+  if (simpleMatch) return simpleMatch[1].trim();
+  return undefined;
+}
+
 // Convert Supabase DB job row to clean Job model
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function mapDbJob(row: any): Job {
+  const { listingType, isVerified } = classifyJobRow(row);
   return {
     id: row.id,
     slug: row.external_id || row.id,
@@ -47,13 +110,16 @@ function mapDbJob(row: any): Job {
     employmentType: row.employment_type || "Full-time",
     workMode: row.work_mode || "On-site",
     publishedAt: row.published_at || new Date().toISOString(),
+    expiresAt: row.expires_at || undefined,
     source: row.source || "Official Employer Feed",
     applicationUrl: row.application_url || "#",
     description: row.description || "",
     skills: Array.isArray(row.skills) ? row.skills : [],
-    isVerified: Boolean(row.verified_at || row.is_active),
+    isVerified,
+    listingType,
     isPreview: false,
     imageUrl: row.image_url,
+    salary: extractSalary(row),
   };
 }
 
@@ -76,6 +142,14 @@ export async function fetchJobs(): Promise<Job[]> {
   } catch {
     return fallbackJobs;
   }
+}
+
+/**
+ * Fetch only verified vacancies (for Google for Jobs index and sitemaps)
+ */
+export async function fetchVerifiedVacancies(): Promise<Job[]> {
+  const jobs = await fetchJobs();
+  return jobs.filter((j) => j.listingType === "verified_vacancy");
 }
 
 /**
@@ -223,6 +297,28 @@ export async function fetchCareerGuideBySlug(slug: string): Promise<CareerGuide 
   }
 }
 
+/**
+ * Fetch a single category by slug
+ */
+export async function fetchCategoryBySlug(slug: string): Promise<Category | null> {
+  const cats = await fetchCategories();
+  return cats.find((c) => c.slug.toLowerCase() === slug.toLowerCase()) || null;
+}
+
+/**
+ * Fetch all active jobs in a given category
+ */
+export async function fetchJobsByCategory(categorySlug: string): Promise<Job[]> {
+  const allJobs = await fetchJobs();
+  const category = await fetchCategoryBySlug(categorySlug);
+  if (!category) return [];
+  return allJobs.filter(
+    (j) =>
+      j.category.toLowerCase() === category.name.toLowerCase() ||
+      j.category.toLowerCase().includes(category.name.toLowerCase())
+  );
+}
+
 // ==============================================================================
 // Fallback Datasets (Direct Real UK Seed Data Mirror)
 // Ensures the app renders reliably with zero downtime
@@ -244,6 +340,7 @@ export const fallbackJobs: Job[] = [
     description: "GXO lists a full-time permanent Warehouse Operative / Storekeeper role supporting its SGN contract in Epsom. Duties include issuing materials to engineers, picking and preparing orders, receiving deliveries, recording stock, monitoring stock levels and supporting stock takes. Stated annual salary of £31,721 and Monday-to-Friday hours between 08:00 and 16:00.",
     skills: ["warehouse operations", "stock control", "order picking", "manual handling", "inventory systems", "UK driving licence"],
     isVerified: true,
+    listingType: "verified_vacancy",
     isPreview: false,
     imageUrl: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1200&q=80",
     salary: "£31,721 / year",
@@ -263,6 +360,7 @@ export const fallbackJobs: Job[] = [
     description: "GXO advertises a permanent Class 1 Driver role in Warrington, with 48 hours per week Monday to Friday. The employer lists an annual salary of £44,879. Duties include multi-drop deliveries, safe vehicle operation, load checks, and operating lift decks. Requires full UK licence with C+E entitlement, valid Driver CPC and digital tachograph card.",
     skills: ["Class 1 driving", "C+E licence", "Driver CPC", "digital tachograph", "delivery documentation", "road safety"],
     isVerified: true,
+    listingType: "verified_vacancy",
     isPreview: false,
     imageUrl: "https://images.unsplash.com/photo-1601584115197-04ecc0da31d7?auto=format&fit=crop&w=1200&q=80",
     salary: "£44,879 / year",
@@ -282,6 +380,7 @@ export const fallbackJobs: Job[] = [
     description: "Permanent Class 2 Driver opportunity based in Harlow, offering an annual salary of £39,268 across 45 scheduled weekly hours. Delivering to commercial accounts, conducting vehicle pre-checks and completing manifests. Requires Category C licence, valid CPC, and tachograph card.",
     skills: ["Class 2 driving", "Category C licence", "Driver CPC", "digital tachograph", "customer delivery", "safety compliance"],
     isVerified: true,
+    listingType: "verified_vacancy",
     isPreview: false,
     imageUrl: "https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&fit=crop&w=1200&q=80",
     salary: "£39,268 / year",
@@ -301,6 +400,7 @@ export const fallbackJobs: Job[] = [
     description: "Payroll governance and process improvement analyst supporting national UK payroll operations. Responsible for data reconciliation, system audits, reporting compliance, and cross-functional HR collaboration.",
     skills: ["payroll analysis", "governance", "Excel", "data reconciliation", "process improvement", "reporting"],
     isVerified: true,
+    listingType: "verified_vacancy",
     isPreview: false,
     imageUrl: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=1200&q=80",
   },
@@ -319,6 +419,7 @@ export const fallbackJobs: Job[] = [
     description: "Part-time Cleaning Operative vacancy at York Depot with an annual salary of £10,625. Responsible for daily sanitation, hygiene compliance, depot cleanliness, and safe chemical handling.",
     skills: ["cleaning", "attention to detail", "reliability", "hygiene", "teamwork"],
     isVerified: true,
+    listingType: "verified_vacancy",
     isPreview: false,
     imageUrl: "https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1200&q=80",
     salary: "£10,625 / year",
@@ -338,6 +439,7 @@ export const fallbackJobs: Job[] = [
     description: "Combined warehouse logistics and facility cleanliness role at Medequip Newport. Includes loading medical equipment, managing stock intake, cleaning returned equipment, and keeping dispatch docks organized.",
     skills: ["warehouse support", "equipment handling", "depot cleanliness", "manual handling", "stock intake"],
     isVerified: true,
+    listingType: "verified_vacancy",
     isPreview: false,
     imageUrl: "https://images.unsplash.com/photo-1553413077-190dd305871c?auto=format&fit=crop&w=1200&q=80",
   },

@@ -25,11 +25,9 @@ export async function getAdminSupabaseClient() {
  * Fallback memory store for when RLS blocks anonymous mutations
  * ensuring the Admin UI never breaks for the user.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const memoryOverrides = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   jobs: new Map<string, any>(),
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   deletedJobs: new Set<string>(),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   categories: new Map<string, any>(),

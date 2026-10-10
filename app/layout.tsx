@@ -4,25 +4,29 @@ import { SiteHeader } from "./components/site-header";
 import { Footer } from "./components/footer";
 import { AnalyticsTracker } from "./components/analytics-tracker";
 import { UiProvider } from "./components/ui-provider";
+import { CookieConsent } from "./components/cookie-consent";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://appbeb.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
-  title: { default: "AppBeb — Find your next opportunity", template: "%s | AppBeb" },
-  description: "Simple job search and practical AI career tools for every kind of worker.",
-  alternates: { canonical: "/" },
+  title: {
+    default: "AppBeb — Verified UK & European Job Opportunities & Free AI Tools",
+    template: "%s | AppBeb",
+  },
+  description:
+    "Simple, honest job search featuring verified UK and European vacancies, and private, local-first AI career tools for CV building and interview preparation.",
   openGraph: {
     type: "website",
     siteName: "AppBeb",
-    title: "AppBeb — Find your next opportunity",
-    description: "Find a better job and prepare for it with simple AI career tools.",
+    title: "AppBeb — Find Your Next Opportunity",
+    description: "Search verified job openings and prepare with private AI tools.",
     url: siteUrl,
   },
   twitter: {
     card: "summary_large_image",
-    title: "AppBeb — Find your next opportunity",
-    description: "Simple job search and practical AI career tools.",
+    title: "AppBeb — Verified UK & European Job Opportunities",
+    description: "Search verified job openings and prepare with private AI tools.",
   },
   robots: { index: true, follow: true },
 };
@@ -52,6 +56,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
           <main className="site-main">{children}</main>
           <Footer />
           <AnalyticsTracker />
+          <CookieConsent />
         </UiProvider>
       </body>
     </html>

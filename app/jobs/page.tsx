@@ -16,28 +16,56 @@ export default function JobsPage() {
   const [categoriesList, setCategoriesList] = useState<Category[]>(fallbackCategories);
   const [loading, setLoading] = useState(false);
 
-  const [query, setQuery] = useState("");
-  const [location, setLocation] = useState("");
-  const [category, setCategory] = useState("");
+  const [query, setQuery] = useState(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("query") || params.get("q") || "";
+    }
+    return "";
+  });
+  const [location, setLocation] = useState(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("location") || params.get("l") || "";
+    }
+    return "";
+  });
+  const [category, setCategory] = useState(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("category") || params.get("c") || "";
+    }
+    return "";
+  });
   const [mode, setMode] = useState<string>("");
   const [type, setType] = useState("");
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const { info } = useToast();
 
-  // Load live jobs and categories from API + read initial URL query params
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const q = params.get("query") || params.get("q");
-      const loc = params.get("location") || params.get("l");
-      const cat = params.get("category") || params.get("c");
-      if (q) setQuery(q);
-      if (loc) setLocation(loc);
-      if (cat) setCategory(cat);
-    }
+  const handleQueryChange = (val: string) => {
+    setQuery(val);
+    setCurrentPage(1);
+  };
+  const handleLocationChange = (val: string) => {
+    setLocation(val);
+    setCurrentPage(1);
+  };
+  const handleCategoryChange = (val: string) => {
+    setCategory(val);
+    setCurrentPage(1);
+  };
+  const handleModeChange = (val: string) => {
+    setMode(val);
+    setCurrentPage(1);
+  };
+  const handleTypeChange = (val: string) => {
+    setType(val);
+    setCurrentPage(1);
+  };
 
-    setLoading(true);
+  // Load live jobs and categories from API
+  useEffect(() => {
     fetch("/api/jobs")
       .then((res) => res.json())
       .then((data) => {
@@ -67,11 +95,6 @@ export default function JobsPage() {
       return matchesQuery && matchesLocation && matchesCategory && matchesMode && matchesType;
     });
   }, [jobs, query, location, category, mode, type]);
-
-  // Reset to page 1 whenever filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [query, location, category, mode, type]);
 
   const totalPages = Math.max(1, Math.ceil(results.length / PAGE_SIZE));
 
@@ -184,7 +207,7 @@ export default function JobsPage() {
               id="job-query"
               className="input-control"
               value={query}
-              onChange={(event) => setQuery(event.target.value)}
+              onChange={(event) => handleQueryChange(event.target.value)}
               placeholder="e.g. driver, warehouse, cleaner"
             />
           </div>
@@ -195,7 +218,7 @@ export default function JobsPage() {
               id="job-location"
               className="input-control"
               value={location}
-              onChange={(event) => setLocation(event.target.value)}
+              onChange={(event) => handleLocationChange(event.target.value)}
               placeholder="e.g. London, York, Epsom, Warrington"
             />
           </div>
@@ -206,7 +229,7 @@ export default function JobsPage() {
               id="job-category"
               className="select-control"
               value={category}
-              onChange={(event) => setCategory(event.target.value)}
+              onChange={(event) => handleCategoryChange(event.target.value)}
             >
               <option value="">All Categories</option>
               {categoriesList.map((item) => (
@@ -223,7 +246,7 @@ export default function JobsPage() {
               id="job-mode"
               className="select-control"
               value={mode}
-              onChange={(event) => setMode(event.target.value)}
+              onChange={(event) => handleModeChange(event.target.value)}
             >
               <option value="">Any Work Mode</option>
               <option value="On-site">On-site</option>
@@ -238,7 +261,7 @@ export default function JobsPage() {
               id="job-type"
               className="select-control"
               value={type}
-              onChange={(event) => setType(event.target.value)}
+              onChange={(event) => handleTypeChange(event.target.value)}
             >
               <option value="">Any Employment Type</option>
               <option value="Full-time">Full-time</option>
