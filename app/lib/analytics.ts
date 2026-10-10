@@ -1,0 +1,2 @@
+export type AnalyticsEventName = "page_view" | "job_search" | "job_detail_view" | "outbound_application_click";
+export function trackAnalytics(event: AnalyticsEventName, path = window.location.pathname, jobId?: string) { void fetch("/api/analytics", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ event, path, ...(jobId ? { jobId } : {}) }) }).catch(() => undefined); }
