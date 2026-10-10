@@ -51,6 +51,7 @@ export function Footer() {
           <Link href="/disclaimer">Platform Disclaimer</Link>
           <Link href="/editorial-policy">Job Verification Policy</Link>
           <Link href="/report-job">Report a Job / Removal</Link>
+          <Link href="/admin/login">Staff Portal</Link>
         </div>
       </div>
 

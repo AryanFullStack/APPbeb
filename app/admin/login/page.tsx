@@ -131,7 +131,7 @@ export default function AdminLoginPage() {
               transition: "all 0.15s ease",
             }}
           >
-            Supabase Account
+            Admin Credentials
           </button>
           <button
             type="button"
@@ -149,14 +149,14 @@ export default function AdminLoginPage() {
               transition: "all 0.15s ease",
             }}
           >
-            Admin Security Key
+            Server Access Key
           </button>
         </div>
 
         {authMode === "credentials" ? (
           <>
             <label className="field-label" htmlFor="admin-email">
-              Admin Email
+              Recorded Admin Email
             </label>
             <input
               id="admin-email"
@@ -170,7 +170,7 @@ export default function AdminLoginPage() {
             />
 
             <label className="field-label" htmlFor="admin-password" style={{ marginTop: 14 }}>
-              Password
+              Account Password
             </label>
             <input
               id="admin-password"
@@ -182,11 +182,15 @@ export default function AdminLoginPage() {
               autoComplete="current-password"
               required
             />
+            <div style={{ marginTop: 8, fontSize: 11, color: "var(--muted)", display: "flex", alignItems: "center", gap: 5 }}>
+              <Icon name="lock" size={13} />
+              <span>Verifies database records and admin permissions.</span>
+            </div>
           </>
         ) : (
           <>
             <label className="field-label" htmlFor="admin-email-key">
-              Operator Identifier (Email)
+              Recorded Administrator Email
             </label>
             <input
               id="admin-email-key"
@@ -195,10 +199,11 @@ export default function AdminLoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="admin@appbeb.com"
+              required
             />
 
             <label className="field-label" htmlFor="admin-key" style={{ marginTop: 14 }}>
-              Admin Access Key / Passphrase
+              Server Access Key
             </label>
             <input
               id="admin-key"
@@ -206,18 +211,11 @@ export default function AdminLoginPage() {
               type="password"
               value={adminKey}
               onChange={(e) => setAdminKey(e.target.value)}
-              placeholder="Enter master admin key"
+              placeholder="Enter configured server access key"
               required
             />
-            <div style={{ marginTop: 6, fontSize: 11, color: "var(--muted)", display: "flex", justifyContent: "space-between" }}>
-              <span>Protected by role-level safeguards</span>
-              <button
-                type="button"
-                onClick={() => setAdminKey("AppBebAdmin2026!")}
-                style={{ background: "none", border: "none", color: "var(--teal)", cursor: "pointer", padding: 0, textDecoration: "underline", fontSize: 11 }}
-              >
-                Use default key
-              </button>
+            <div style={{ marginTop: 8, fontSize: 11, color: "var(--muted)" }}>
+              Requires matching registered administrator email and configured server environment key.
             </div>
           </>
         )}

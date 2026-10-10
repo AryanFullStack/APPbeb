@@ -2,7 +2,6 @@ import { cookies } from "next/headers";
 import { createClient as createSupabaseServerClient, isSupabaseConfigured } from "./supabase/server";
 
 export const ADMIN_COOKIE_NAME = "appbeb_admin_session";
-const DEFAULT_ADMIN_KEY = "AppBebAdmin2026!";
 
 export interface AdminUser {
   id: string;
@@ -27,7 +26,7 @@ export async function getAdminSession(): Promise<AdminUser | null> {
         return {
           id: parsed.id || "admin_session",
           email: parsed.email,
-          role: parsed.role || "super_admin",
+          role: parsed.role || "admin",
           authType: parsed.authType || "key",
         };
       }
@@ -45,19 +44,21 @@ export async function getAdminSession(): Promise<AdminUser | null> {
       } = await supabase.auth.getUser();
 
       if (user) {
-        // Query profiles table or fallback to default admin role
+        // Query profiles table in database - user MUST exist with role = 'admin'
         const { data: profile } = await supabase
           .from("profiles")
           .select("role")
           .eq("id", user.id)
-          .single();
+          .maybeSingle();
 
-        return {
-          id: user.id,
-          email: user.email || "admin@appbeb.com",
-          role: (profile?.role as "admin") || "admin",
-          authType: "supabase",
-        };
+        if (profile && profile.role === "admin") {
+          return {
+            id: user.id,
+            email: user.email || "",
+            role: "admin",
+            authType: "supabase",
+          };
+        }
       }
     } catch {
       // Supabase auth check failed
@@ -76,10 +77,13 @@ export async function verifyAdminAccess(): Promise<boolean> {
 }
 
 /**
- * Validate admin credentials (either Supabase auth or Admin Key)
+ * Validate admin credentials (only against securely configured server environment variable)
  */
 export function validateAdminKey(key: string): boolean {
-  const configuredKey = process.env.ADMIN_ACCESS_KEY || process.env.ADMIN_KEY || DEFAULT_ADMIN_KEY;
+  const configuredKey = process.env.ADMIN_ACCESS_KEY || process.env.ADMIN_KEY;
+  if (!configuredKey || !configuredKey.trim()) {
+    return false;
+  }
   return Boolean(key && key.trim() === configuredKey.trim());
 }
 

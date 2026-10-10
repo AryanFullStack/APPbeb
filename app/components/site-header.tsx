@@ -69,9 +69,6 @@ export function SiteHeader() {
         </nav>
 
         <div className="header-actions">
-          <Link href="/admin/login" className="admin-link">
-            Admin
-          </Link>
           <Link
             href="/ai-tools/resume-builder"
             className="button button-small button-teal header-cta"
