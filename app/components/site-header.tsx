@@ -13,9 +13,25 @@ const links = [
   { href: "/pricing", label: "Pricing" },
 ];
 
+declare global {
+  interface Window {
+    adsbygoogle?: unknown[];
+  }
+}
+
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const pathname = usePathname();
+
+  useEffect(() => {
+    try {
+      if (typeof window !== "undefined") {
+        (window.adsbygoogle = window.adsbygoogle || []).push({});
+      }
+    } catch {
+      // Ignore if AdSense has already processed this ins element or is blocked
+    }
+  }, [pathname]);
 
   useEffect(() => {
     function handleResize() {
@@ -32,60 +48,88 @@ export function SiteHeader() {
   }
 
   return (
-    <header className="site-header">
-      <div className="shell header-inner">
-        <Link
-          href="/"
-          className="brand"
-          onClick={() => setOpen(false)}
-          aria-label="AppBeb home"
-        >
-          <span className="brand-mark">A</span>
-          <span>
-            AppBeb<span className="brand-dot">.</span>
-          </span>
-        </Link>
-
-        <nav
-          className={open ? "main-nav is-open" : "main-nav"}
-          aria-label="Main navigation"
-        >
-          {links.map((link) => {
-            const isActive =
-              link.href === "/"
-                ? pathname === "/"
-                : pathname.startsWith(link.href);
-            return (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={isActive ? "is-active" : ""}
-                onClick={() => setOpen(false)}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="header-actions">
+    <>
+      <header className="site-header">
+        <div className="shell header-inner">
           <Link
-            href="/ai-tools/resume-builder"
-            className="button button-small button-teal header-cta"
+            href="/"
+            className="brand"
+            onClick={() => setOpen(false)}
+            aria-label="AppBeb home"
           >
-            Build My CV <Icon name="arrow-up-right" size={14} />
+            <span className="brand-mark">A</span>
+            <span>
+              AppBeb<span className="brand-dot">.</span>
+            </span>
           </Link>
-          <button
-            className="menu-toggle"
-            type="button"
-            aria-expanded={open}
-            aria-label={open ? "Close menu" : "Open menu"}
-            onClick={() => setOpen(!open)}
+
+          <nav
+            className={open ? "main-nav is-open" : "main-nav"}
+            aria-label="Main navigation"
           >
-            <Icon name={open ? "x" : "menu"} size={20} />
-          </button>
+            {links.map((link) => {
+              const isActive =
+                link.href === "/"
+                  ? pathname === "/"
+                  : pathname.startsWith(link.href);
+              return (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={isActive ? "is-active" : ""}
+                  onClick={() => setOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="header-actions">
+            <Link
+              href="/ai-tools/resume-builder"
+              className="button button-small button-teal header-cta"
+            >
+              Build My CV <Icon name="arrow-up-right" size={14} />
+            </Link>
+            <button
+              className="menu-toggle"
+              type="button"
+              aria-expanded={open}
+              aria-label={open ? "Close menu" : "Open menu"}
+              onClick={() => setOpen(!open)}
+            >
+              <Icon name={open ? "x" : "menu"} size={20} />
+            </button>
+          </div>
         </div>
+      </header>
+
+      {/* Uper ads */}
+      <div
+        className="shell"
+        style={{
+          margin: "12px auto",
+          textAlign: "center",
+          overflow: "hidden",
+          minHeight: "90px",
+        }}
+        aria-label="Advertisement"
+      >
+        <ins
+          className="adsbygoogle"
+          style={{ display: "block" }}
+          data-ad-client="ca-pub-1772306849032580"
+          data-ad-slot="6839881602"
+          data-ad-format="auto"
+          data-full-width-responsive="true"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "(adsbygoogle = window.adsbygoogle || []).push({});",
+          }}
+        />
       </div>
-    </header>
+    </>
   );
 }
