@@ -1,0 +1,6 @@
+{
+  "markdownlint.ignore": [
+    "*.md"
+  ],
+  "css.lint.unknownAtRules": "ignore"
+}

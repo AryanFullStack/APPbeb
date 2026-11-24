@@ -44,10 +44,10 @@ export default function PrivacyPage() {
               1. Local CV Drafts & Optional In-Editor AI Assist
             </h2>
             <p style={{ color: "var(--navy-muted)", fontSize: 14.5, lineHeight: 1.6, margin: "0 0 14px" }}>
-              When you use our Resume Builder, your personal contact information, work history, and qualifications are stored strictly inside your browser’s local IndexedDB and localStorage. AppBeb does not copy, back up, or persist your full CV drafts on our central servers during normal editing. You can clear this draft at any time directly through your browser or with a single click of the "Reset draft" button.
+              When you use our Resume Builder, your personal contact information, work history, and qualifications are stored strictly inside your browser’s local IndexedDB and localStorage. AppBeb does not copy, back up, or persist your full CV drafts on our central servers during normal editing. You can clear this draft at any time directly through your browser or with a single click of the &quot;Reset draft&quot; button.
             </p>
             <p style={{ color: "var(--navy-muted)", fontSize: 14.5, lineHeight: 1.6, margin: "0 0 24px" }}>
-              If you optionally choose to trigger AI assistance within the editor (such as "AI Summary Assist" or "AI Polish Bullets"), only the specific text excerpt (e.g., your selected job title, listed skills, or specific draft bullet point) is transmitted over an encrypted TLS connection to our secure server endpoint for prompt processing. This snippet is processed in-memory solely to generate the requested refinement, is never used to train public models, and is never stored in persistent profile databases.
+              If you optionally choose to trigger AI assistance within the editor (such as &quot;AI Summary Assist&quot; or &quot;AI Polish Bullets&quot;), only the specific text excerpt (e.g., your selected job title, listed skills, or specific draft bullet point) is transmitted over an encrypted TLS connection to our secure server endpoint for prompt processing. This snippet is processed in-memory solely to generate the requested refinement, is never used to train public models, and is never stored in persistent profile databases.
             </p>
 
             <h2 style={{ fontSize: 20, fontWeight: 800, margin: "0 0 12px", color: "var(--navy)" }}>

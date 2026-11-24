@@ -32,8 +32,9 @@ export default function AdminLoginPage() {
   // Check if already authenticated
   useEffect(() => {
     fetch("/api/admin/auth")
-      .then((res) => {
-        if (res.ok) {
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.authenticated) {
           router.replace("/admin");
         } else {
           setCheckingAuth(false);

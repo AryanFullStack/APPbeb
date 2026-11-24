@@ -12,7 +12,7 @@ import { memoryOverrides } from "../../../lib/supabase/admin";
 export async function GET() {
   const session = await getAdminSession();
   if (!session) {
-    return NextResponse.json({ authenticated: false }, { status: 401 });
+    return NextResponse.json({ authenticated: false });
   }
   return NextResponse.json({ authenticated: true, user: session });
 }
