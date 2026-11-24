@@ -44,20 +44,20 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   };
 
   return (
-    <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
-      <body suppressHydrationWarning>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
-        />
-        <UiProvider>
-          <SiteHeader />
-          <main className="site-main">{children}</main>
-          <Footer />
-          <AnalyticsTracker />
-          <CookieConsent />
-        </UiProvider>
-      </body>
-    </html>
-  );
+        <html lang="en" suppressHydrationWarning data-scroll-behavior="smooth">
+          <body suppressHydrationWarning>
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+            />
+            <UiProvider>
+              <SiteHeader />
+              <main className="site-main">{children}</main>
+              <Footer />
+              <AnalyticsTracker />
+              <CookieConsent />
+            </UiProvider>
+          </body>
+        </html>
+        );
 }
