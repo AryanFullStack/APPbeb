@@ -52,11 +52,14 @@ const tools = [
 ];
 
 export default async function Home() {
-  const [jobs, categories, guides] = await Promise.all([
+  const [allJobs, categories, guides] = await Promise.all([
     fetchJobs(),
     fetchCategories(),
     fetchCareerGuides(),
   ]);
+
+  // Only showcase active, non-expired opportunities on the homepage
+  const jobs = allJobs.filter((j) => j.listingType !== "expired_or_closed");
 
   return (
     <>
@@ -106,14 +109,13 @@ export default async function Home() {
           </div>
 
           <div className="trusted-row">
-            <div className="trust-stars" aria-label="5 out of 5 stars">
-              ★ ★ ★ ★ ★
-            </div>
-            <span>Verified Employer Vacancies</span>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 6, color: "var(--teal)", fontWeight: 700 }}>
+              <Icon name="check" size={14} /> Direct Employer Applications
+            </span>
             <span className="trust-divider">·</span>
-            <span>Zero account required</span>
+            <span>Zero Middleman Fees</span>
             <span className="trust-divider">·</span>
-            <span>Private browser storage</span>
+            <span>Private Browser Storage</span>
           </div>
 
           <p className="preview-notice">

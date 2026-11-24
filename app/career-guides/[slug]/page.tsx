@@ -75,11 +75,18 @@ export default async function GuidePage({
     datePublished: guide.publishedAt,
   };
 
-  // Split content paragraphs
+  // Split content paragraphs, ensuring clean non-empty blocks
   const paragraphs = guide.content
     .split(/\r?\n\r?\n/)
     .map((p) => p.trim())
     .filter(Boolean);
+
+  // Filter out duplicate overview sections that merely echo guide.content
+  const uniqueSections = (guide.sections || []).filter(
+    (section) =>
+      section.heading?.toLowerCase() !== "overview" &&
+      section.content.trim() !== guide.content.trim()
+  );
 
   return (
     <section className="detail-section">
@@ -127,12 +134,12 @@ export default async function GuidePage({
             </p>
           ))}
 
-          {guide.sections && guide.sections.length > 0 && (
+          {uniqueSections.length > 0 && (
             <div style={{ marginTop: 32 }}>
-              {guide.sections.map((section, sIndex) => (
+              {uniqueSections.map((section, sIndex) => (
                 <div key={sIndex} style={{ marginBottom: 24 }}>
                   {section.heading && (
-                    <h2 style={{ fontSize: 22, marginTop: 28, marginBottom: 12 }}>
+                    <h2 style={{ fontSize: 22, marginTop: 28, marginBottom: 12, color: "var(--navy)" }}>
                       {section.heading}
                     </h2>
                   )}
@@ -141,6 +148,59 @@ export default async function GuidePage({
               ))}
             </div>
           )}
+
+          {/* Official UK References & Practical Guidance Box */}
+          <div
+            style={{
+              marginTop: 40,
+              padding: "24px 28px",
+              background: "var(--bg-subtle)",
+              border: "1px solid var(--line)",
+              borderRadius: "var(--radius-md)",
+            }}
+          >
+            <h3 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 10px", color: "var(--navy)" }}>
+              Official UK Employment Standards & Verification Sources
+            </h3>
+            <p style={{ fontSize: 13.5, color: "var(--navy-muted)", lineHeight: 1.6, margin: "0 0 16px" }}>
+              For official statutory rules, employment contracts, and worker rights in England, Scotland, Wales, and Northern Ireland, consult authorized public resources:
+            </p>
+            <ul style={{ fontSize: 13.5, color: "var(--navy)", lineHeight: 1.7, margin: 0, paddingLeft: 20 }}>
+              <li>
+                <a
+                  href="https://www.gov.uk/national-minimum-wage-rates"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "var(--teal)", textDecoration: "underline" }}
+                >
+                  GOV.UK — National Minimum Wage & Living Wage Rates
+                </a>{" "}
+                (Statutory hourly minimums for all UK workers)
+              </li>
+              <li>
+                <a
+                  href="https://www.acas.org.uk/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "var(--teal)", textDecoration: "underline" }}
+                >
+                  ACAS (Advisory, Conciliation and Arbitration Service)
+                </a>{" "}
+                (Free, impartial guidance on UK workplace rights, probation periods, and contracts)
+              </li>
+              <li>
+                <a
+                  href="https://nationalcareers.service.gov.uk/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "var(--teal)", textDecoration: "underline" }}
+                >
+                  National Careers Service
+                </a>{" "}
+                (Government career profiles, entry requirements, and skills assessments)
+              </li>
+            </ul>
+          </div>
 
           {/* Action Callout Box */}
           <div

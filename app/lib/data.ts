@@ -37,9 +37,35 @@ function getCategoryIcon(
 // Job classification helper to separate genuine vacancies from external career portals
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function classifyJobRow(row: any): { listingType: import("./types").ListingType; isVerified: boolean } {
-  const isExpired = (row.expires_at && new Date(row.expires_at) < new Date()) || row.is_active === false;
+  // Explicitly identify filled/closed positions (e.g., GXO Epsom position filled on employer portal)
+  const isKnownClosed =
+    row.external_id === "gxo-warehouse-epsom-1417607700" ||
+    row.slug === "gxo-warehouse-epsom-1417607700" ||
+    row.id === "18604edf-4af4-4c98-9a5a-97fa786bdfa2";
+
+  const isExpired =
+    isKnownClosed ||
+    (row.expires_at && new Date(row.expires_at) < new Date()) ||
+    row.is_active === false;
+
   if (isExpired) {
     return { listingType: "expired_or_closed", isVerified: false };
+  }
+
+  // Filter out non-UK/EU entries (e.g. Canada, Australia, Singapore) to match AppBeb's UK/Europe mandate
+  const isNonUkEu =
+    (row.external_id &&
+      (row.external_id.startsWith("intl-gls-canada") ||
+        row.external_id.startsWith("intl-ryder-canada") ||
+        row.external_id.startsWith("intl-hellofresh-australia") ||
+        row.external_id.startsWith("intl-dhl-singapore"))) ||
+    (row.location &&
+      ["canada", "australia", "singapore", "united states", "usa"].some((c) =>
+        row.location.toLowerCase().includes(c)
+      ));
+
+  if (isNonUkEu) {
+    return { listingType: "rejected_or_invalid", isVerified: false };
   }
 
   if (
@@ -138,7 +164,9 @@ export async function fetchJobs(): Promise<Job[]> {
       return fallbackJobs;
     }
 
-    return data.map(mapDbJob);
+    const mapped = data.map(mapDbJob);
+    // Exclude rejected non-UK/EU roles (Canada, Australia, Singapore) from UK/Europe platform feeds
+    return mapped.filter((j) => j.listingType !== "rejected_or_invalid");
   } catch {
     return fallbackJobs;
   }
@@ -200,16 +228,31 @@ export async function fetchCategories(): Promise<Category[]> {
       return fallbackCategories;
     }
 
-    // Get counts per category
+    // Get counts per category (excluding rejected non-UK/EU and closed roles)
     const { data: jobs } = await supabase
       .from("jobs")
-      .select("category_id")
+      .select("category_id, location, external_id, expires_at, is_active")
       .eq("is_active", true);
 
     const counts: Record<string, number> = {};
     if (jobs) {
       for (const j of jobs) {
-        if (j.category_id) {
+        const isNonUkEu =
+          (j.external_id &&
+            (j.external_id.startsWith("intl-gls-canada") ||
+              j.external_id.startsWith("intl-ryder-canada") ||
+              j.external_id.startsWith("intl-hellofresh-australia") ||
+              j.external_id.startsWith("intl-dhl-singapore"))) ||
+          (j.location &&
+            ["canada", "australia", "singapore", "united states", "usa"].some((c) =>
+              j.location.toLowerCase().includes(c)
+            ));
+        const isClosed =
+          j.external_id === "gxo-warehouse-epsom-1417607700" ||
+          j.is_active === false ||
+          Boolean(j.expires_at && new Date(j.expires_at) < new Date());
+
+        if (j.category_id && !isNonUkEu && !isClosed) {
           counts[j.category_id] = (counts[j.category_id] || 0) + 1;
         }
       }
@@ -314,8 +357,9 @@ export async function fetchJobsByCategory(categorySlug: string): Promise<Job[]> 
   if (!category) return [];
   return allJobs.filter(
     (j) =>
-      j.category.toLowerCase() === category.name.toLowerCase() ||
-      j.category.toLowerCase().includes(category.name.toLowerCase())
+      j.listingType !== "expired_or_closed" &&
+      (j.category.toLowerCase() === category.name.toLowerCase() ||
+        j.category.toLowerCase().includes(category.name.toLowerCase()))
   );
 }
 
@@ -335,12 +379,13 @@ export const fallbackJobs: Job[] = [
     employmentType: "Full-time, permanent",
     workMode: "On-site",
     publishedAt: "2026-10-09T00:00:00+00:00",
+    expiresAt: "2026-11-01T00:00:00+00:00",
     source: "GXO Careers",
     applicationUrl: "https://jobs.gxo.com/job/Epsom-Warehouse-Operative-ENG-KT19-9AF/1417607700/",
-    description: "GXO lists a full-time permanent Warehouse Operative / Storekeeper role supporting its SGN contract in Epsom. Duties include issuing materials to engineers, picking and preparing orders, receiving deliveries, recording stock, monitoring stock levels and supporting stock takes. Stated annual salary of £31,721 and Monday-to-Friday hours between 08:00 and 16:00.",
+    description: "GXO lists a full-time permanent Warehouse Operative / Storekeeper role supporting its SGN contract in Epsom. Duties include issuing materials to engineers, picking and preparing orders, receiving deliveries, recording stock, monitoring stock levels and supporting stock takes. Stated annual salary of £31,721 and Monday-to-Friday hours between 08:00 and 16:00. Note: Employer portal records indicate this specific vacancy has been filled.",
     skills: ["warehouse operations", "stock control", "order picking", "manual handling", "inventory systems", "UK driving licence"],
-    isVerified: true,
-    listingType: "verified_vacancy",
+    isVerified: false,
+    listingType: "expired_or_closed",
     isPreview: false,
     imageUrl: "https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=1200&q=80",
     salary: "£31,721 / year",

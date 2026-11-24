@@ -730,7 +730,7 @@ export function ResumeBuilder() {
 
             <div className="local-note">
               <Icon name="lock" size={14} />
-              Draft data resides solely in your browser’s IndexedDB. Nothing is uploaded to external servers.
+              CV drafts autosave privately in your browser’s IndexedDB. When using optional AI Assist (Summary or Bullet Polishing), only the selected text snippet is securely processed in memory to generate suggestions.
             </div>
           </div>
 

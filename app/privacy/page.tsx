@@ -42,17 +42,20 @@ export default function PrivacyPage() {
         <div className="shell" style={{ maxWidth: 840 }}>
           <div className="form-card" style={{ padding: 36 }}>
             <h2 style={{ fontSize: 20, fontWeight: 800, margin: "0 0 12px", color: "var(--navy)" }}>
-              1. Local CV Drafts (IndexedDB)
+              1. Local CV Drafts & Optional In-Editor AI Assist
             </h2>
+            <p style={{ color: "var(--navy-muted)", fontSize: 14.5, lineHeight: 1.6, margin: "0 0 14px" }}>
+              When you use our Resume Builder, your personal contact information, work history, and qualifications are stored strictly inside your browser’s local IndexedDB and localStorage. AppBeb does not copy, back up, or persist your full CV drafts on our central servers during normal editing. You can clear this draft at any time directly through your browser or with a single click of the "Reset draft" button.
+            </p>
             <p style={{ color: "var(--navy-muted)", fontSize: 14.5, lineHeight: 1.6, margin: "0 0 24px" }}>
-              When you use our Resume Builder, your personal contact information, work history, and qualifications are stored strictly inside your browser’s local IndexedDB and localStorage. AppBeb does not copy, back up, or store this draft on our central servers. You can clear this draft at any time directly through your browser or with a single click.
+              If you optionally choose to trigger AI assistance within the editor (such as "AI Summary Assist" or "AI Polish Bullets"), only the specific text excerpt (e.g., your selected job title, listed skills, or specific draft bullet point) is transmitted over an encrypted TLS connection to our secure server endpoint for prompt processing. This snippet is processed in-memory solely to generate the requested refinement, is never used to train public models, and is never stored in persistent profile databases.
             </p>
 
             <h2 style={{ fontSize: 20, fontWeight: 800, margin: "0 0 12px", color: "var(--navy)" }}>
-              2. AI Feature Interactions
+              2. Standalone AI Career Tools
             </h2>
             <p style={{ color: "var(--navy-muted)", fontSize: 14.5, lineHeight: 1.6, margin: "0 0 24px" }}>
-              When you use our AI features (Resume Matcher, Cover Letter Generator, or Interview Prep), the text you submit is transmitted over an encrypted TLS connection strictly to generate your response. We do not sell, retain in persistent databases, or use your submitted personal details for training public models.
+              When you use our standalone AI tools (Resume-to-Job Matcher, Cover Letter Generator, or Interview Prep Guide), the text inputs you supply are transmitted over encrypted TLS solely to perform the requested analysis. We do not sell, store in persistent user databases, or use your submitted personal details for training public language models.
             </p>
 
             <h2 style={{ fontSize: 20, fontWeight: 800, margin: "0 0 12px", color: "var(--navy)" }}>

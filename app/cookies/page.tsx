@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Icon } from "../components/ui-icon";
+import { CookieManager } from "../components/cookie-manager";
 
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://appbeb.com";
 
@@ -80,9 +81,11 @@ export default function CookiesPage() {
               .
             </p>
 
-            <div className="local-note">
+            <CookieManager />
+
+            <div className="local-note" style={{ marginTop: 24 }}>
               <Icon name="check-circle" size={15} />
-              You can clear all stored site data at any time via your browser’s “Clear Site Data” or “Clear Cookies” settings.
+              You can also clear all stored site data at any time via your browser’s “Clear Site Data” or “Clear Cookies” settings.
             </div>
           </div>
         </div>

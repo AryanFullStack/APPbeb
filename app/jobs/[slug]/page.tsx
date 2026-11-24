@@ -182,10 +182,15 @@ export default async function JobDetail({
         }
       : null;
 
-  // Fetch related jobs in the same category or employer
+  // Fetch active related jobs in the same category or employer
   const allJobs = await fetchJobs();
   const relatedJobs = allJobs
-    .filter((j) => j.id !== job.id && (j.category === job.category || j.company === job.company))
+    .filter(
+      (j) =>
+        j.id !== job.id &&
+        j.listingType !== "expired_or_closed" &&
+        (j.category === job.category || j.company === job.company)
+    )
     .slice(0, 3);
 
   return (
@@ -236,7 +241,25 @@ export default async function JobDetail({
               <h1>{job.title}</h1>
               <div className="detail-company">
                 {job.company} · {job.location}
-                {job.isVerified ? (
+                {isExpired ? (
+                  <span
+                    style={{
+                      marginLeft: 8,
+                      fontSize: 12,
+                      fontWeight: 600,
+                      color: "#9f1239",
+                      background: "#fff1f2",
+                      border: "1px solid #fecdd3",
+                      padding: "2px 8px",
+                      borderRadius: 999,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 4,
+                    }}
+                  >
+                    <Icon name="x" size={11} /> Position Filled / Closed
+                  </span>
+                ) : job.isVerified ? (
                   <span className="verified" style={{ marginLeft: 8 }}>
                     <Icon name="check" size={11} /> Verified Vacancy
                   </span>
@@ -364,16 +387,48 @@ export default async function JobDetail({
           </article>
 
           <aside className="apply-card">
-            <h2>{job.listingType === "career_portal_resource" ? "Visit Career Portal" : "Apply For Position"}</h2>
+            <h2>
+              {isExpired
+                ? "Applications Closed"
+                : job.listingType === "career_portal_resource"
+                ? "Visit Career Portal"
+                : "Apply For Position"}
+            </h2>
             <p>
-              Applications are submitted directly through the employer source ({job.source}). AppBeb does not charge any fees or store your application files.
+              {isExpired
+                ? "This position has reached its deadline or has been reported as filled by the employer. Browse active verified roles on AppBeb."
+                : `Applications are submitted directly through the employer source (${job.source}). AppBeb does not charge any fees or store your application files.`}
             </p>
 
-            <TrackedOutboundLink href={job.applicationUrl} jobId={job.id}>
-              <span className="button button-teal" style={{ width: "100%", justifyContent: "center" }}>
-                {job.listingType === "career_portal_resource" ? "Visit Official Careers Site" : "Apply on Official Site"} <Icon name="arrow-up-right" size={15} />
-              </span>
-            </TrackedOutboundLink>
+            {isExpired ? (
+              <div style={{ display: "grid", gap: 10 }}>
+                <span
+                  className="button"
+                  style={{
+                    width: "100%",
+                    justifyContent: "center",
+                    background: "var(--line)",
+                    color: "var(--navy-muted)",
+                    cursor: "not-allowed",
+                  }}
+                >
+                  Position Filled / Closed
+                </span>
+                <Link
+                  href="/jobs"
+                  className="button button-teal"
+                  style={{ width: "100%", justifyContent: "center" }}
+                >
+                  Browse Active Vacancies <Icon name="arrow-up-right" size={15} />
+                </Link>
+              </div>
+            ) : (
+              <TrackedOutboundLink href={job.applicationUrl} jobId={job.id}>
+                <span className="button button-teal" style={{ width: "100%", justifyContent: "center" }}>
+                  {job.listingType === "career_portal_resource" ? "Visit Official Careers Site" : "Apply on Official Site"} <Icon name="arrow-up-right" size={15} />
+                </span>
+              </TrackedOutboundLink>
+            )}
 
             <div className="privacy-note">
               <Icon name="lock" size={14} />

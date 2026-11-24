@@ -2,7 +2,8 @@ import type { MetadataRoute } from "next";
 import { fetchCareerGuides, fetchJobs, fetchCategories } from "./lib/data";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = process.env.NEXT_PUBLIC_SITE_URL || "https://appbeb.com";
+  const rawBase = process.env.NEXT_PUBLIC_SITE_URL;
+  const base = rawBase && !rawBase.includes("localhost") ? rawBase : "https://appbeb.com";
 
   const [jobs, categories, guides] = await Promise.all([
     fetchJobs(),

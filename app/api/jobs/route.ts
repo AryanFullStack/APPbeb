@@ -16,6 +16,7 @@ export async function GET(request: Request) {
     ]);
 
     const filtered = allJobs.filter((job) => {
+      if (job.listingType === "expired_or_closed") return false;
       const matchText = `${job.title} ${job.company} ${job.category} ${job.skills.join(" ")}`.toLowerCase();
       const matchesQuery = !query || matchText.includes(query);
       const matchesLocation = !location || job.location.toLowerCase().includes(location);

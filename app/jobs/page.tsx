@@ -82,6 +82,8 @@ export default function JobsPage() {
 
   const results = useMemo(() => {
     return jobs.filter((job) => {
+      // Exclude expired or closed jobs from active search results
+      if (job.listingType === "expired_or_closed") return false;
       const text = `${job.title} ${job.company} ${job.category} ${job.skills.join(" ")}`.toLowerCase();
       const matchesQuery = !query || text.includes(query.toLowerCase());
       const matchesLocation = !location || job.location.toLowerCase().includes(location.toLowerCase());

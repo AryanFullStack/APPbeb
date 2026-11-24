@@ -6,7 +6,8 @@ import { AnalyticsTracker } from "./components/analytics-tracker";
 import { UiProvider } from "./components/ui-provider";
 import { CookieConsent } from "./components/cookie-consent";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://appbeb.com";
+const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+const siteUrl = rawSiteUrl && !rawSiteUrl.includes("localhost") ? rawSiteUrl : "https://appbeb.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
@@ -46,13 +47,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
 
   return (
     <html lang="en">
-      <head>
-        <script
-          async
-          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1772306849032580"
-          crossOrigin="anonymous"
-        />
-      </head>
       <body>
         <script
           type="application/ld+json"
