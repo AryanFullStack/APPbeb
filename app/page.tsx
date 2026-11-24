@@ -4,8 +4,7 @@ import { Icon } from "./components/ui-icon";
 import { JobCard } from "./components/job-card";
 import { SectionHeading } from "./components/section-heading";
 import { fetchJobs, fetchCategories, fetchCareerGuides } from "./lib/data";
-
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://appbeb.com";
+import { siteUrl } from "./lib/utils";
 
 export const metadata: Metadata = {
   title: "AppBeb — Verified UK & European Job Opportunities & Free AI Career Tools",

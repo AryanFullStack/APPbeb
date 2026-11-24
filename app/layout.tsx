@@ -5,9 +5,7 @@ import { Footer } from "./components/footer";
 import { AnalyticsTracker } from "./components/analytics-tracker";
 import { UiProvider } from "./components/ui-provider";
 import { CookieConsent } from "./components/cookie-consent";
-
-const rawSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
-const siteUrl = rawSiteUrl && !rawSiteUrl.includes("localhost") ? rawSiteUrl : "https://appbeb.com";
+import { siteUrl } from "./lib/utils";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import { siteUrl } from "../lib/utils";
 
-const base = process.env.NEXT_PUBLIC_SITE_URL || "https://appbeb.com";
+const base = siteUrl;
 
 export const metadata: Metadata = {
   title: "Find Verified Jobs in the UK & Europe | AppBeb",
