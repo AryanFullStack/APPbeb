@@ -2,18 +2,21 @@ async function verify() {
   const ts = Date.now();
   console.log('Fetching production pages with cache bypass timestamp:', ts);
 
-  const [homeHtml, epsomHtml, guideHtml, jobsApi, cookiesHtml] = await Promise.all([
-    fetch(`https://appbeb.com/?nocache=${ts}`).then(r => r.text()),
-    fetch(`https://appbeb.com/jobs/gxo-warehouse-epsom-1417607700?nocache=${ts}`).then(r => r.text()),
-    fetch(`https://appbeb.com/career-guides/uk-warehouse-operative-jobs?nocache=${ts}`).then(r => r.text()),
-    fetch(`https://appbeb.com/api/jobs?nocache=${ts}`).then(r => r.json()),
-    fetch(`https://appbeb.com/cookies?nocache=${ts}`).then(r => r.text()),
+  const [homeHtml, epsomHtml, guideHtml, jobsApi, cookiesHtml, sitemapXml] = await Promise.all([
+    fetch(`https://appbeb.com/?v=${ts}`).then(r => r.text()),
+    fetch(`https://appbeb.com/jobs/gxo-warehouse-epsom-1417607700?v=${ts}`).then(r => r.text()),
+    fetch(`https://appbeb.com/career-guides/uk-warehouse-operative-jobs?v=${ts}`).then(r => r.text()),
+    fetch(`https://appbeb.com/api/jobs?v=${ts}`).then(r => r.json()),
+    fetch(`https://appbeb.com/cookies?v=${ts}`).then(r => r.text()),
+    fetch(`https://appbeb.com/sitemap.xml`).then(r => r.text()),
   ]);
 
   console.log('----------------------------------------------------');
   console.log('1. HOMEPAGE:');
   console.log(' - Contains 5-star rating (★)?:', homeHtml.includes('★'));
   console.log(' - Contains "Direct Employer Applications"?:', homeHtml.includes('Direct Employer Applications'));
+  const canonicalMatch = homeHtml.match(/<link rel="canonical" href="([^"]+)"/);
+  console.log(' - Canonical URL:', canonicalMatch ? canonicalMatch[1] : 'Not found');
   const homeCountMatch = homeHtml.match(/Browse All (\d+) Verified Positions/i) || homeHtml.match(/Browse all jobs \((\d+)\)/i);
   console.log(' - Homepage active job count match:', homeCountMatch ? homeCountMatch[0] : 'Not found');
 
@@ -45,6 +48,12 @@ async function verify() {
   console.log(' - Contains "Manage Your Stored Preferences"?:', cookiesHtml.includes('Manage Your Stored Preferences'));
   console.log(' - Contains "Reject Non-Essential"?:', cookiesHtml.includes('Reject Non-Essential'));
   console.log(' - Contains "Reset Preferences"?:', cookiesHtml.includes('Reset Preferences'));
+
+  console.log('----------------------------------------------------');
+  console.log('6. SITEMAP.XML:');
+  console.log(' - Sitemap contains Epsom expired job?:', sitemapXml.includes('gxo-warehouse-epsom-1417607700'));
+  console.log(' - Sitemap contains localhost:3000?:', sitemapXml.includes('localhost:3000'));
+  console.log(' - Sitemap contains https://appbeb.com?:', sitemapXml.includes('https://appbeb.com'));
   console.log('----------------------------------------------------');
 }
 
